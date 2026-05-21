@@ -5,9 +5,21 @@
 			{
 				"name": "ForEach1",
 				"type": "ForEach",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "LK_INGESTION_src_names",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"userProperties": [],
 				"typeProperties": {
+					"items": {
+						"value": "@activity('LK_INGESTION_src_names').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
 					"activities": [
 						{
 							"name": "LK_INGESTION",
@@ -32,7 +44,7 @@
 								"source": {
 									"type": "AzureSqlSource",
 									"sqlReaderQuery": {
-										"value": "@concat('\nSELECT * FROM dbo.ingestion_config\nWHERE source_name = ''', pipeline().parameters.source_name, \n''' ')",
+										"value": "@concat('\nSELECT * FROM dbo.ingestion_config\nWHERE source_name = ''', item().source_name, \n''' ')",
 										"type": "Expression"
 									},
 									"queryTimeout": "02:00:00",
@@ -43,7 +55,7 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"source_name": {
-											"value": "@pipeline().parameters.source_name",
+											"value": "@item().source_name",
 											"type": "Expression"
 										}
 									}
@@ -122,10 +134,7 @@
 												"referenceName": "DS_ADLS_CAPSTONE8_SRC",
 												"type": "DatasetReference",
 												"parameters": {
-													"source_path": {
-														"value": "@pipeline().parameters.source_name",
-														"type": "Expression"
-													}
+													"file_name": "*"
 												}
 											}
 										],
@@ -195,7 +204,7 @@
 												"type": "DatasetReference",
 												"parameters": {
 													"source_name": {
-														"value": "@pipeline().parameters.source_name",
+														"value": "@item().source_name",
 														"type": "Expression"
 													}
 												}
@@ -261,7 +270,7 @@
 								"source": {
 									"type": "AzureSqlSource",
 									"sqlReaderQuery": {
-										"value": "@concat(\n    'select last_watermark_value from dbo.pipeline_watermark where source_table_name = ''',\n    pipeline().parameters.source_name,\n    ''''\n)",
+										"value": "@concat(\n    'select last_watermark_value from dbo.pipeline_watermark where source_table_name = ''',\n    item().source_name,\n    ''''\n)",
 										"type": "Expression"
 									},
 									"queryTimeout": "02:00:00",
@@ -272,7 +281,7 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"source_name": {
-											"value": "@pipeline().parameters.source_name",
+											"value": "@item().source_name",
 											"type": "Expression"
 										}
 									}
@@ -304,6 +313,38 @@
 							}
 						}
 					]
+				}
+			},
+			{
+				"name": "LK_INGESTION_src_names",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "SELECT source_name FROM dbo.ingestion_config;",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_SQLDB_CAPSTONE8_SRC",
+						"type": "DatasetReference",
+						"parameters": {
+							"source_name": {
+								"value": "@pipeline().parameters.source_name",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
 				}
 			}
 		],
