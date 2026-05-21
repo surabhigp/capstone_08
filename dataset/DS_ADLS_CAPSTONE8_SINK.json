@@ -1,0 +1,19 @@
+{
+	"name": "DS_ADLS_CAPSTONE8_SINK",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ADLS_CAPSTONE8",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

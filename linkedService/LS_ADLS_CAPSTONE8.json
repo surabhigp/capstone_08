@@ -1,0 +1,19 @@
+{
+	"name": "LS_ADLS_CAPSTONE8",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureBlobFS",
+		"typeProperties": {
+			"url": "https://stcapstone08.dfs.core.windows.net/",
+			"accountKey": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "LS_KV_CAPSTONE8",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "adls-storage-key"
+			}
+		}
+	}
+}
