@@ -5,7 +5,14 @@
 			{
 				"name": "LK_INGESTION",
 				"type": "Lookup",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "LK_last_updated_at_watermark",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "0.12:00:00",
 					"retry": 0,
@@ -35,6 +42,177 @@
 						}
 					}
 				}
+			},
+			{
+				"name": "last_watermark_value",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "LK_last_watermark_value",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "last_watermark_value",
+					"value": {
+						"value": "@activity('LK_last_watermark_value').output.firstRow.last_watermark_value",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "LK_last_watermark_value",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "@concat(\n    'select last_watermark_value from dbo.pipeline_watermark where source_table_name = ''',\n    pipeline().parameters.source_name,\n    ''''\n)",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_SQLDB_CAPSTONE8_SRC",
+						"type": "DatasetReference",
+						"parameters": {
+							"source_name": {
+								"value": "@pipeline().parameters.source_name",
+								"type": "Expression"
+							}
+						}
+					}
+				}
+			},
+			{
+				"name": "LK_last_updated_at_watermark",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "last_watermark_value",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "last_watermark_value",
+					"value": {
+						"value": "@utcNow()",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "CD_SQL_TO_ADLS",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "@concat(\n    activity('LK_INGESTION').output.firstRow.source_query,\n    ' where ',\n    activity('LK_INGESTION').output.firstRow.watermark_column,\n    ' > ''',\n    variables('last_watermark_value'),\n    ''' and ',\n    activity('LK_INGESTION').output.firstRow.watermark_column,\n    ' <= ''',\n    variables('last_updated_at'),\n    ''''\n)",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "ParquetWriteSettings"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_SQLDB_CAPSTONE8_SRC",
+						"type": "DatasetReference",
+						"parameters": {
+							"source_name": {
+								"value": "@pipeline().parameters.source_name",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_ADLS_CAPSTONE8_SINK",
+						"type": "DatasetReference",
+						"parameters": {
+							"filePath": {
+								"value": "@activity('LK_INGESTION').output.firstRow.target_path",
+								"type": "Expression"
+							},
+							"fileName": {
+								"value": "@activity('LK_INGESTION').output.firstRow.target_table",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "If Condition1",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "LK_INGESTION",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@if(activity('LK_INGESTION').output.firstRow.source_type,'azure_sql','adls_file')",
+						"type": "Expression"
+					}
+				}
 			}
 		],
 		"parameters": {
@@ -43,6 +221,14 @@
 			},
 			"table_name": {
 				"type": "string"
+			}
+		},
+		"variables": {
+			"last_watermark_value": {
+				"type": "String"
+			},
+			"last_updated_at": {
+				"type": "String"
 			}
 		},
 		"annotations": [],

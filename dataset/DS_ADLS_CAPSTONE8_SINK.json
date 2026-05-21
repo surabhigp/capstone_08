@@ -5,11 +5,28 @@
 			"referenceName": "LS_ADLS_CAPSTONE8",
 			"type": "LinkedServiceReference"
 		},
+		"parameters": {
+			"filePath": {
+				"type": "string"
+			},
+			"fileName": {
+				"type": "string"
+			}
+		},
 		"annotations": [],
 		"type": "Parquet",
 		"typeProperties": {
 			"location": {
-				"type": "AzureBlobFSLocation"
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@dataset().fileName",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@dataset().filePath",
+					"type": "Expression"
+				},
+				"fileSystem": "capstone08"
 			},
 			"compressionCodec": "snappy"
 		},
