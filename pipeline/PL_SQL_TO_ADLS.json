@@ -99,11 +99,6 @@
 												"storeSettings": {
 													"type": "AzureBlobFSReadSettings",
 													"recursive": true,
-													"wildcardFolderPath": {
-														"value": "@activity('LK_INGESTION').output.firstRow.source_path",
-														"type": "Expression"
-													},
-													"wildcardFileName": "*",
 													"enablePartitionDiscovery": false
 												},
 												"formatSettings": {
@@ -134,7 +129,10 @@
 												"referenceName": "DS_ADLS_CAPSTONE8_SRC",
 												"type": "DatasetReference",
 												"parameters": {
-													"file_name": "*"
+													"source_name": {
+														"value": "@activity('LK_INGESTION').output.firstRow.source_path",
+														"type": "Expression"
+													}
 												}
 											}
 										],
