@@ -17,7 +17,8 @@
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
-				"type": "AzureBlobFSLocation"
+				"type": "AzureBlobFSLocation",
+				"fileSystem": "capstone08"
 			},
 			"columnDelimiter": ",",
 			"escapeChar": "\\",
