@@ -6,10 +6,7 @@
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
-			"source_path": {
-				"type": "string"
-			},
-			"file_name": {
+			"source_name": {
 				"type": "string"
 			}
 		},
@@ -17,7 +14,13 @@
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
-				"type": "AzureBlobFSLocation"
+				"type": "AzureBlobFSLocation",
+				"fileName": "*",
+				"folderPath": {
+					"value": "@dataset().source_name",
+					"type": "Expression"
+				},
+				"fileSystem": "capstone08"
 			},
 			"columnDelimiter": ",",
 			"escapeChar": "\\",
