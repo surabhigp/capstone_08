@@ -5,20 +5,12 @@
 			"referenceName": "LS_SQL_CAPSTONE8",
 			"type": "LinkedServiceReference"
 		},
-		"parameters": {
-			"source_name": {
-				"type": "string"
-			}
-		},
 		"annotations": [],
 		"type": "AzureSqlTable",
 		"schema": [],
 		"typeProperties": {
-			"schema": "dbo",
-			"table": {
-				"value": "@dataset().source_name",
-				"type": "Expression"
-			}
+			"schema": "",
+			"table": ""
 		}
 	},
 	"type": "Microsoft.DataFactory/factories/datasets"

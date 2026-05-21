@@ -6,7 +6,7 @@
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
-			"source_name": {
+			"sourcePath": {
 				"type": "string"
 			}
 		},
@@ -15,9 +15,9 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": "*",
+				"fileName": "framework_transactions.csv",
 				"folderPath": {
-					"value": "@dataset().source_name",
+					"value": "@dataset().sourcePath",
 					"type": "Expression"
 				},
 				"fileSystem": "capstone08"

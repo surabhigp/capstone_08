@@ -22,53 +22,11 @@
 					"isSequential": true,
 					"activities": [
 						{
-							"name": "LK_INGESTION",
-							"type": "Lookup",
-							"dependsOn": [
-								{
-									"activity": "LK_last_updated_at_watermark",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"policy": {
-								"timeout": "0.12:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"source": {
-									"type": "AzureSqlSource",
-									"sqlReaderQuery": {
-										"value": "@concat('\nSELECT * FROM dbo.ingestion_config\nWHERE source_name = ''', item().source_name, \n''' ')",
-										"type": "Expression"
-									},
-									"queryTimeout": "02:00:00",
-									"partitionOption": "None"
-								},
-								"dataset": {
-									"referenceName": "DS_SQLDB_CAPSTONE8_SRC",
-									"type": "DatasetReference",
-									"parameters": {
-										"source_name": {
-											"value": "@item().source_name",
-											"type": "Expression"
-										}
-									}
-								},
-								"firstRowOnly": true
-							}
-						},
-						{
 							"name": "If Condition1",
 							"type": "IfCondition",
 							"dependsOn": [
 								{
-									"activity": "LK_INGESTION",
+									"activity": "Watermark_last_updated_at",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -77,7 +35,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"expression": {
-									"value": "@equals(activity('LK_INGESTION').output.firstRow.source_type,'azure_sql')",
+									"value": "@equals(item().source_type,'azure_sql')",
 									"type": "Expression"
 								},
 								"ifFalseActivities": [
@@ -129,8 +87,8 @@
 												"referenceName": "DS_ADLS_CAPSTONE8_SRC",
 												"type": "DatasetReference",
 												"parameters": {
-													"source_name": {
-														"value": "@activity('LK_INGESTION').output.firstRow.source_path",
+													"sourcePath": {
+														"value": "@item().source_path",
 														"type": "Expression"
 													}
 												}
@@ -142,11 +100,11 @@
 												"type": "DatasetReference",
 												"parameters": {
 													"filePath": {
-														"value": "@activity('LK_INGESTION').output.firstRow.target_path",
+														"value": "@item().target_path",
 														"type": "Expression"
 													},
 													"fileName": {
-														"value": "@activity('LK_INGESTION').output.firstRow.target_table",
+														"value": "@item().target_table",
 														"type": "Expression"
 													}
 												}
@@ -171,7 +129,7 @@
 											"source": {
 												"type": "AzureSqlSource",
 												"sqlReaderQuery": {
-													"value": "@concat(\n    activity('LK_INGESTION').output.firstRow.source_query,\n    ' where ',\n    activity('LK_INGESTION').output.firstRow.watermark_column,\n    ' > ''',\n    variables('last_watermark_value'),\n    ''' and ',\n    activity('LK_INGESTION').output.firstRow.watermark_column,\n    ' <= ''',\n    variables('last_updated_at'),\n    ''''\n)",
+													"value": "@concat(\n    item().source_query,\n    ' where ',\n    item().watermark_column,\n    ' > ''',\n    variables('last_watermark_value'),\n    ''' and ',\n    item().watermark_column,\n    ' <= ''',\n    variables('last_updated_at'),\n    ''''\n)",
 													"type": "Expression"
 												},
 												"queryTimeout": "02:00:00",
@@ -199,13 +157,7 @@
 										"inputs": [
 											{
 												"referenceName": "DS_SQLDB_CAPSTONE8_SRC",
-												"type": "DatasetReference",
-												"parameters": {
-													"source_name": {
-														"value": "@item().source_name",
-														"type": "Expression"
-													}
-												}
+												"type": "DatasetReference"
 											}
 										],
 										"outputs": [
@@ -214,11 +166,11 @@
 												"type": "DatasetReference",
 												"parameters": {
 													"filePath": {
-														"value": "@activity('LK_INGESTION').output.firstRow.target_path",
+														"value": "@item().target_path",
 														"type": "Expression"
 													},
 													"fileName": {
-														"value": "@activity('LK_INGESTION').output.firstRow.target_table",
+														"value": "@item().target_table",
 														"type": "Expression"
 													}
 												}
@@ -276,18 +228,12 @@
 								},
 								"dataset": {
 									"referenceName": "DS_SQLDB_CAPSTONE8_SRC",
-									"type": "DatasetReference",
-									"parameters": {
-										"source_name": {
-											"value": "@item().source_name",
-											"type": "Expression"
-										}
-									}
+									"type": "DatasetReference"
 								}
 							}
 						},
 						{
-							"name": "LK_last_updated_at_watermark",
+							"name": "Watermark_last_updated_at",
 							"type": "SetVariable",
 							"dependsOn": [
 								{
@@ -328,32 +274,18 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-						"sqlReaderQuery": "SELECT source_name FROM dbo.ingestion_config;",
+						"sqlReaderQuery": "SELECT * FROM dbo.ingestion_config;",
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
 					"dataset": {
 						"referenceName": "DS_SQLDB_CAPSTONE8_SRC",
-						"type": "DatasetReference",
-						"parameters": {
-							"source_name": {
-								"value": "@pipeline().parameters.source_name",
-								"type": "Expression"
-							}
-						}
+						"type": "DatasetReference"
 					},
 					"firstRowOnly": false
 				}
 			}
 		],
-		"parameters": {
-			"source_name": {
-				"type": "string"
-			},
-			"table_name": {
-				"type": "string"
-			}
-		},
 		"variables": {
 			"last_watermark_value": {
 				"type": "String"
