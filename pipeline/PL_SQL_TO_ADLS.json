@@ -5,6 +5,8 @@
 			{
 				"name": "ForEach1",
 				"type": "ForEach",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "LK_INGESTION_src_names",
@@ -373,6 +375,12 @@
 						"dependencyConditions": [
 							"Succeeded"
 						]
+					},
+					{
+						"activity": "LK_INGESTION_src_names",
+						"dependencyConditions": [
+							"Succeeded"
+						]
 					}
 				],
 				"policy": {
@@ -384,10 +392,10 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Capstone_08/CAPSTONE_PRocessing",
+					"notebookPath": "/Capstone_08/nb_metadata_drive_processing",
 					"baseParameters": {
 						"input": {
-							"value": "@activity('LK_INGESTION_src_names').output.value",
+							"value": "@string(activity('LK_INGESTION_src_names').output.value)",
 							"type": "Expression"
 						}
 					}
