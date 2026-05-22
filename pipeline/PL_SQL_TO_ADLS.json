@@ -254,7 +254,7 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"variableName": "last_watermark_value",
+								"variableName": "last_updated_at",
 								"value": {
 									"value": "@utcNow()",
 									"type": "Expression"
@@ -288,6 +288,33 @@
 						"type": "DatasetReference"
 					},
 					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "CAPSTONE_PROCESSING",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "ForEach1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Capstone_08/CAPSTONE_PRocessing"
+				},
+				"linkedServiceName": {
+					"referenceName": "DBW_CAPSTONE_08",
+					"type": "LinkedServiceReference"
 				}
 			}
 		],
