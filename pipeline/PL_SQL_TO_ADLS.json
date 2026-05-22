@@ -5,8 +5,6 @@
 			{
 				"name": "ForEach1",
 				"type": "ForEach",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "LK_INGESTION_src_names",
@@ -202,7 +200,7 @@
 											"source": {
 												"type": "AzureSqlSource",
 												"sqlReaderQuery": {
-													"value": "@concat('\n\nSELECT MAX(last_updated)\nfrom ', item().source_name\n\n)",
+													"value": "@concat('SELECT MAX(last_updated) as last_updated from ',item().source_name)",
 													"type": "Expression"
 												},
 												"queryTimeout": "02:00:00",
@@ -211,7 +209,8 @@
 											"dataset": {
 												"referenceName": "DS_SQLDB_CAPSTONE8_SRC",
 												"type": "DatasetReference"
-											}
+											},
+											"firstRowOnly": false
 										}
 									},
 									{
@@ -238,7 +237,7 @@
 											"storedProcedureParameters": {
 												"new_watermark": {
 													"value": {
-														"value": "@activity('Lookup_max_updated_date').output.firstRow",
+														"value": "@activity('Lookup_max_updated_date').output.value[0].last_updated",
 														"type": "Expression"
 													},
 													"type": "DateTime"
@@ -342,8 +341,6 @@
 			{
 				"name": "LK_INGESTION_src_names",
 				"type": "Lookup",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
