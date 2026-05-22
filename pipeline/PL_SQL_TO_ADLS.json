@@ -139,7 +139,8 @@
 											"sink": {
 												"type": "ParquetSink",
 												"storeSettings": {
-													"type": "AzureBlobFSWriteSettings"
+													"type": "AzureBlobFSWriteSettings",
+													"copyBehavior": "PreserveHierarchy"
 												},
 												"formatSettings": {
 													"type": "ParquetWriteSettings"
@@ -177,6 +178,84 @@
 												}
 											}
 										]
+									},
+									{
+										"name": "Lookup_max_updated_date",
+										"type": "Lookup",
+										"dependsOn": [
+											{
+												"activity": "CD_SQL_TO_ADLS",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "0.12:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"source": {
+												"type": "AzureSqlSource",
+												"sqlReaderQuery": {
+													"value": "@concat('\n\nSELECT MAX(last_updated)\nfrom ', item().source_name\n\n)",
+													"type": "Expression"
+												},
+												"queryTimeout": "02:00:00",
+												"partitionOption": "None"
+											},
+											"dataset": {
+												"referenceName": "DS_SQLDB_CAPSTONE8_SRC",
+												"type": "DatasetReference"
+											}
+										}
+									},
+									{
+										"name": "usp_update_db_watermark",
+										"type": "SqlServerStoredProcedure",
+										"dependsOn": [
+											{
+												"activity": "Lookup_max_updated_date",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "0.12:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"storedProcedureName": "[dbo].[sp_update_db_watermark]",
+											"storedProcedureParameters": {
+												"new_watermark": {
+													"value": {
+														"value": "@activity('Lookup_max_updated_date').output.firstRow",
+														"type": "Expression"
+													},
+													"type": "DateTime"
+												},
+												"source_table_name": {
+													"value": {
+														"value": "@item().source_name",
+														"type": "Expression"
+													},
+													"type": "String"
+												}
+											}
+										},
+										"linkedServiceName": {
+											"referenceName": "LS_SQL_CAPSTONE8",
+											"type": "LinkedServiceReference"
+										}
 									}
 								]
 							}
@@ -291,7 +370,14 @@
 			{
 				"name": "CAPSTONE_PROCESSING",
 				"type": "DatabricksNotebook",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "ForEach1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "0.12:00:00",
 					"retry": 0,
