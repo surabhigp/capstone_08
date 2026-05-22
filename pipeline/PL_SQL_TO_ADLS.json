@@ -386,7 +386,10 @@
 				"typeProperties": {
 					"notebookPath": "/Capstone_08/CAPSTONE_PRocessing",
 					"baseParameters": {
-						"input": "[\n\t\t{\n\t\t\t\"source_id\": 1,\n\t\t\t\"source_name\": \"framework_customers\",\n\t\t\t\"source_type\": \"azure_sql\",\n\t\t\t\"source_query\": \"SELECT * FROM dbo.framework_customers\",\n\t\t\t\"source_path\": null,\n\t\t\t\"target_path\": \"raw/framework_customers/\",\n\t\t\t\"target_table\": \"bronze_framework_customers\",\n\t\t\t\"file_format\": \"parquet\",\n\t\t\t\"load_type\": \"incremental\",\n\t\t\t\"watermark_column\": \"last_updated\",\n\t\t\t\"is_active\": 1\n\t\t},\n\t\t{\n\t\t\t\"source_id\": 2,\n\t\t\t\"source_name\": \"framework_products\",\n\t\t\t\"source_type\": \"azure_sql\",\n\t\t\t\"source_query\": \"SELECT * FROM dbo.framework_products\",\n\t\t\t\"source_path\": null,\n\t\t\t\"target_path\": \"raw/framework_products/\",\n\t\t\t\"target_table\": \"bronze_framework_products\",\n\t\t\t\"file_format\": \"parquet\",\n\t\t\t\"load_type\": \"full\",\n\t\t\t\"watermark_column\": \"last_updated\",\n\t\t\t\"is_active\": 1\n\t\t},\n\t\t{\n\t\t\t\"source_id\": 3,\n\t\t\t\"source_name\": \"framework_orders\",\n\t\t\t\"source_type\": \"azure_sql\",\n\t\t\t\"source_query\": \"SELECT * FROM dbo.framework_orders\",\n\t\t\t\"source_path\": null,\n\t\t\t\"target_path\": \"raw/framework_orders/\",\n\t\t\t\"target_table\": \"bronze_framework_orders\",\n\t\t\t\"file_format\": \"parquet\",\n\t\t\t\"load_type\": \"incremental\",\n\t\t\t\"watermark_column\": \"last_updated\",\n\t\t\t\"is_active\": 1\n\t\t},\n\t\t{\n\t\t\t\"source_id\": 4,\n\t\t\t\"source_name\": \"framework_transactions\",\n\t\t\t\"source_type\": \"adls_file\",\n\t\t\t\"source_query\": null,\n\t\t\t\"source_path\": \"source/transactions\",\n\t\t\t\"target_path\": \"raw/framework_transactions/\",\n\t\t\t\"target_table\": \"bronze_framework_transactions\",\n\t\t\t\"file_format\": \"csv\",\n\t\t\t\"load_type\": \"full\",\n\t\t\t\"watermark_column\": \"transaction_date\",\n\t\t\t\"is_active\": 1\n\t\t}\n\t]"
+						"input": {
+							"value": "@activity('LK_INGESTION_src_names').output.value",
+							"type": "Expression"
+						}
 					}
 				},
 				"linkedServiceName": {
