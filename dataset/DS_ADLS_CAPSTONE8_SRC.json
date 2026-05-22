@@ -5,11 +5,6 @@
 			"referenceName": "LS_ADLS_CAPSTONE8",
 			"type": "LinkedServiceReference"
 		},
-		"parameters": {
-			"sourcePath": {
-				"type": "string"
-			}
-		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {

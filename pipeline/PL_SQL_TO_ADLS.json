@@ -90,13 +90,7 @@
 										"inputs": [
 											{
 												"referenceName": "DS_ADLS_CAPSTONE8_SRC",
-												"type": "DatasetReference",
-												"parameters": {
-													"sourcePath": {
-														"value": "@item().source_path",
-														"type": "Expression"
-													}
-												}
+												"type": "DatasetReference"
 											}
 										],
 										"outputs": [
