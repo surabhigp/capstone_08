@@ -15,11 +15,6 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": "framework_transactions.csv",
-				"folderPath": {
-					"value": "@dataset().sourcePath",
-					"type": "Expression"
-				},
 				"fileSystem": "capstone08"
 			},
 			"columnDelimiter": ",",
